@@ -14,6 +14,7 @@ class Mine extends Component{
 		return(
 			<View style={styles.container}>
 		        <Text>Hello!</Text>
+		        <Text>第一个正式的Android 项目</Text>
 		    </View>
 		);
 	}
