@@ -1,5 +1,7 @@
 import React,{Component} from "react";
-import {View,Text,StyleSheet} from "react-native";
+import {View,Text,StyleSheet,Image,TextInput } from "react-native";
+
+console.log(1);
 
 class Greeting extends Component {
   render() {
@@ -11,12 +13,18 @@ class Greeting extends Component {
 
 class Mine extends Component{
 	render(){
+	 	let pic = {
+	      uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
+	    };
+
 		return(
 			<View style={styles.container}>
-		        <Text>Hello!</Text>
-				<Text>Hello!</Text>
-				<Text>Hello!</Text>
-				<Text>Hello!</Text>
+		        <Text>我的安卓程序！</Text>
+		        <Image source={pic} style={{width: 193, height: 110}} />
+		        <TextInput
+			        style={{ borderColor: 'red', borderWidth: 1,width:200,height:40,color:"red"}}
+			     />
+
 		    </View>
 		);
 	}
@@ -24,8 +32,6 @@ class Mine extends Component{
 
 const styles=StyleSheet.create({
 	container:{
-		flex:1,
-		backgroundColor:"#ccc",
 		alignItems:"center",
 		borderColor:"blue"
 	}
