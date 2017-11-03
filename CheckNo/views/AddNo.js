@@ -1,9 +1,11 @@
 import React,{Component} from"react";
-import {Text,Button,View,TextInput,Animated,NativeModules,StyleSheet } from "react-native";
-
+import {Text,Button,View,TextInput,Animated,NativeModules,StyleSheet,FlatList,RefreshControl } from "react-native";
+import Sqlite from "../Util/sqlite";
+import DataRow from "./DataRow";
 
 var Carmgr = NativeModules.Carmgr;
 var Dimensions=require("Dimensions");
+let db;
 
 export default class AddNo extends  Component{
     static navigationOptions={
@@ -15,13 +17,18 @@ export default class AddNo extends  Component{
         this.carnoValue="";
         this.cellphoneValue="";
         this.name="";
+        this.sqlite=new  Sqlite();
     }
 
     componentWillMount (){
         this.setState({
+            refData:[],
             textCellphoneNoInputColor:"#ccc",
             textCarNoInputColor:"#ccc",
-            textNameColor:"#ccc"
+            textNameColor:"#ccc",
+            carno:"",
+            cellphone:"",
+            name:""
         });
     }
 
@@ -52,38 +59,57 @@ export default class AddNo extends  Component{
         }
     }
 
-    submiAddData (carno,phoneno){
-        Carmgr.saveCar( this.name,this.carnoValue,this.cellphoneValue,(name,carno,phoneno)=>{
-            console.log(name)
+    loadData = ()=>{
+        if(db==null){ db=this.sqlite.open(); }
+        let srcData=[];
+        let get= db.transaction((tx)=>{
+            tx.executeSql("select id,name,carno,cellphone from cars where id=(select max(id) from cars)",[],(tx,rs)=>{
+                let len=rs.rows.length;
+                for(let i=0;i<len;i++){
+                    let o=rs.rows.item(i);
+                    srcData.push(o);
+                }
+                this.setState({
+                    refData:srcData
+                });
+            })
+        },(error)=>{
+            console.log("程序错误")
         });
     }
 
+    submiAddData (carno,phoneno){
+        this.sqlite.update("insert into cars(name,carno,cellphone) values(?,?,?)",[this.name,this.carnoValue,this.cellphoneValue],(msg)=>{
+            this.loadData();
+        });
+        this.setState({carno:"",cellphone:"", name:""});
+    }
+    deleteData =(id)=>{
+        this.sqlite.update("delete from cars where id=?",[id],this.loadData);
+    }
     render(){
         const { navigate } = this.props.navigation;
         var {height,width} = Dimensions.get('window');
         var wp=0.85;
+        let fullWidth=width;
         width=width-75;
         return (
-            <View style={{
-                flexDirection:"column",justifyContent:"center",marginTop:5,width:width
-            }}>
+            <View style={{justifyContent:"center",marginTop:5,width:fullWidth }}>
                 <View style={styles.form} >
                     <View style={styles.group} >
                         <View style={{ justifyContent: 'center'}}>
                             <Text style={{ width:75,textAlign:"right"}} >车牌号：</Text>
                         </View>
 
-                         <TextInput style={[styles.textInput,{borderColor:this.state.textCarNoInputColor}]} underlineColorAndroid="transparent" placeholder={"输入需要录入的车牌号"}
-                            onChangeText={(text)=>{
+                         <TextInput style={[styles.textInput,{borderColor:this.state.textCarNoInputColor}]}
+                                    underlineColorAndroid="transparent" placeholder={"输入需要录入的车牌号"} value={this.state.carno}
+                                    onChangeText={(text)=>{
                                 this.carnoValue=text;
+                                this.state.carno=text;
                                 if(text.length==0){
-                                    this.setState({
-                                        textCarNoInputColor:"red"
-                                    });
+                                    this.setState({ textCarNoInputColor:"red"});
                                 }else{
-                                    this.setState({
-                                        textCarNoInputColor:"#ccc"
-                                    });
+                                    this.setState({ textCarNoInputColor:"#ccc" });
                                 }
                             }}
                         />
@@ -95,17 +121,14 @@ export default class AddNo extends  Component{
                         </View>
 
                         <TextInput style={[styles.textInput,{borderColor:this.state.textNameColor}]} underlineColorAndroid="transparent"
-                                   placeholder={"输入车主姓名"}
+                                   placeholder={"输入车主姓名"} value={this.state.name}
                                    onChangeText={(text)=>{
                                        this.name=text;
+                                       this.state.name=text;
                                        if(text.length==0){
-                                           this.setState({
-                                               textNameColor:"red"
-                                           });
+                                           this.setState({ textNameColor:"red" });
                                        }else{
-                                           this.setState({
-                                               textNameColor:"#ccc"
-                                           });
+                                           this.setState({ textNameColor:"#ccc" });
                                        }
                                    }}
                         />
@@ -116,17 +139,16 @@ export default class AddNo extends  Component{
                             <Text style={{width:75,textAlign:"right" }} >车主电话：</Text>
                         </View>
 
-                        <TextInput style={[styles.textInput,{borderColor:this.state.textCellphoneNoInputColor}]} underlineColorAndroid="transparent" placeholder={"车主联系电话"}
+                        <TextInput style={[styles.textInput,{borderColor:this.state.textCellphoneNoInputColor}]}
+                                   underlineColorAndroid="transparent" placeholder={"车主联系电话"} value={this.state.cellphone}
                            onChangeText={(text)=>{
                                this.cellphoneValue=text;
+                               this.state.cellphone=text;
+
                                if(text.length==0){
-                                   this.setState({
-                                       textCellphoneNoInputColor:"red"
-                                   });
+                                   this.setState({ textCellphoneNoInputColor:"red" });
                                }else{
-                                   this.setState({
-                                       textCellphoneNoInputColor:"#ccc"
-                                   });
+                                   this.setState({textCellphoneNoInputColor:"#ccc" });
                                }
                            }}
                         />
@@ -135,6 +157,24 @@ export default class AddNo extends  Component{
 
                 <View style={styles.loginButton}>
                     <Button title="录入" onPress={this.onWrite} />
+                </View>
+
+                <View style={{width:fullWidth}}>
+                    <FlatList
+                        data={this.state.refData}
+                        extraData={this.state}
+                        renderItem={({item}) =>
+                            <DataRow item={item} onDelete={()=>{this.deleteData(item.id); }} reloadData={ this.loadData } />
+                        }
+                        keyExtractor={(item)=>{ return item.id }  }
+                        refreshing={false}
+                        onRefresh={this.loadData}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={false}
+                            />
+                        }
+                    />
                 </View>
             </View>
         );

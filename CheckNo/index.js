@@ -5,13 +5,18 @@ import {TabNavigator} from 'react-navigation';
 import CheckNo from "./views/CheckNo";
 import AddNo from "./views/AddNo";
 import ShowDataBase from "./views/ShowDataBase"
+import Sqlite from "./Util/sqlite";
+
+let sqlite=new Sqlite();
+sqlite.createTable();
+
 
 const tabApp=TabNavigator({
-    CheckNo:{screen: CheckNo},
     AddNo:{screen: AddNo},
+    CheckNo:{screen: CheckNo},
     ShowDataBase:{screen:ShowDataBase}
 },{
-    initialRouteName:"AddNo",
+    initialRouteName:"CheckNo",
     order:["AddNo","CheckNo","ShowDataBase"],
     animationEnabled: true, // 切换页面时是否有动画效果
     tabBarPosition: 'bottom', // 显示在底端，android 默认是显示在页面顶端的

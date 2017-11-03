@@ -11,6 +11,8 @@ import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
 
+import org.pgsqlite.SQLitePluginPackage;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -31,7 +33,9 @@ public class MainApplication extends Application implements ReactApplication {
     @Override
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
-          new MainReactPackage(),new RegPackage()
+          new MainReactPackage(),
+          new RegPackage(),
+          new SQLitePluginPackage()
       );
     }
 
