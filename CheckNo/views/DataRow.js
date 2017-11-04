@@ -17,9 +17,12 @@ export default class DataRow extends Component{
             textCellphoneNoInputColor:"#ccc",
             textCarNoInputColor:"#ccc",
             textNameColor:"#ccc",
+            textCompanyunitColor:"#ccc",
+
             carno:"",
             cellphone:"",
-            name:""
+            name:"",
+            companyunit:""
         });
     }
     onSubmit =()=>{ //监控  "录入"  按钮事件，组装输入框参数
@@ -44,16 +47,25 @@ export default class DataRow extends Component{
             });
             flag=false;
         }
+
+        if(this.state.companyunit.length==0){
+            this.setState({
+                textCompanyunitColor:"red"
+            });
+            flag=false;
+        }
+
         if(flag){
             this.submiAddData();
         }
     }
 
     submiAddData (){
-        this.sqlite.update("update cars set name=?,carno=?,cellphone=? where id=?",[this.state.name,this.state.carno,this.state.cellphone,this.state.carid],(msg)=>{
+        this.sqlite.update("update cars set name=?,carno=?,cellphone=?,companyunit=? where id=?"
+            ,[this.state.name,this.state.carno,this.state.cellphone,this.state.companyunit,this.state.carid],(msg)=>{
             this.props.reloadData();
         });
-        this.setState({carno:"",cellphone:"", name:"",modalVisible:false});
+        this.setState({carno:"",cellphone:"", name:"",companyunit:"",modalVisible:false});
     }
 
     setModalVisible(visible) {
@@ -68,7 +80,8 @@ export default class DataRow extends Component{
            carno:item.carno,
            cellphone:item.cellphone,
            name:item.name,
-           carid:item.id
+           carid:item.id,
+           companyunit:item.companyunit
        });
     }
 
@@ -78,10 +91,13 @@ export default class DataRow extends Component{
             <View style={{flexDirection:"row",backgroundColor:"#e5e5e5",marginTop:12,justifyContent:"space-between",alignItems:"center",paddingLeft:5,paddingRight:5}}>
                 <View style={{width:200}}>
                     <Text>
-                        {this.props.item.name}  {this.props.item.carno}
+                        {this.props.item.carno} {this.props.item.name}
                     </Text>
                     <Text>
                         {this.props.item.cellphone}
+                    </Text>
+                    <Text>
+                        {this.props.item.companyunit}
                     </Text>
                 </View>
 
@@ -123,7 +139,7 @@ export default class DataRow extends Component{
                         <View style={styles.form} >
                             <View style={styles.group} >
                                 <View style={{ justifyContent: 'center'}}>
-                                    <Text style={{ width:75,textAlign:"right"}} >车牌号：</Text>
+                                    <Text style={{ width:80,textAlign:"right"}} >车牌号：</Text>
                                 </View>
 
                                 <TextInput style={[styles.textInput,{borderColor:this.state.textCarNoInputColor}]}
@@ -141,7 +157,7 @@ export default class DataRow extends Component{
 
                             <View style={styles.group} >
                                 <View style={{ justifyContent: 'center'}}>
-                                    <Text style={{ width:75,textAlign:"right"}} >车主姓名：</Text>
+                                    <Text style={{ width:80,textAlign:"right"}} >车主姓名：</Text>
                                 </View>
 
                                 <TextInput style={[styles.textInput,{borderColor:this.state.textNameColor}]} underlineColorAndroid="transparent"
@@ -159,7 +175,7 @@ export default class DataRow extends Component{
 
                             <View style={styles.group} >
                                 <View style={{ justifyContent: 'center'}}>
-                                    <Text style={{width:75,textAlign:"right" }} >车主电话：</Text>
+                                    <Text style={{width:80,textAlign:"right" }} >车主电话：</Text>
                                 </View>
 
                                 <TextInput style={[styles.textInput,{borderColor:this.state.textCellphoneNoInputColor}]}
@@ -175,15 +191,37 @@ export default class DataRow extends Component{
                                 />
                             </View>
 
-                            <View style={[styles.group,{width:120,justifyContent:"space-around"}]}>
 
-                                <TouchableHighlight onPress={ ()=>{ this.setState({modalVisible:false}) } }  style={[styles.touchButton,{ backgroundColor:"#ccc" }]}  >
-                                    <Text style={{color:"#fff",fontWeight:"bold"}}>取消</Text>
+                            <View style={styles.group} >
+                                <View style={{ justifyContent: 'center'}}>
+                                    <Text style={{width:80,textAlign:"right" }} >单位/公司：</Text>
+                                </View>
+
+                                <TextInput style={[styles.textInput,{borderColor:this.state.textCompanyunitColor}]}
+                                           underlineColorAndroid="transparent" placeholder={"单位/公司"} value={this.state.companyunit}
+                                           onChangeText={(text)=>{
+                                               this.state.companyunit=text;
+
+                                               if(text.length==0){
+                                                   this.setState({ textCompanyunitColor:"red" });
+                                               }else{
+                                                   this.setState({textCompanyunitColor:"#ccc" });
+                                               }
+                                           }}
+                                />
+                            </View>
+
+
+                            <View style={[styles.group,{width:150,justifyContent:"space-around"}]}>
+
+                                <TouchableHighlight onPress={ ()=>{ this.setState({modalVisible:false}) } }
+                                                    style={[styles.touchButton,{ backgroundColor:"#ccc",width:60,height:40 }]}  >
+                                    <Text style={{color:"#fff",fontWeight:"bold",fontSize:18}}>取消</Text>
                                 </TouchableHighlight>
 
 
-                                <TouchableHighlight onPress={this.onSubmit}  style={[styles.touchButton,{ backgroundColor:"orange" }]} >
-                                    <Text style={{color:"#fff",fontWeight:"bold"}}>提交</Text>
+                                <TouchableHighlight onPress={this.onSubmit}  style={[styles.touchButton,{ backgroundColor:"orange",width:60,height:40 }]} >
+                                    <Text style={{color:"#fff",fontWeight:"bold",fontSize:18}}>提交</Text>
                                 </TouchableHighlight>
                             </View>
                         </View>
@@ -206,7 +244,8 @@ const styles=StyleSheet.create({
         width:width*wp,
         justifyContent:"center",alignItems:"center",
         backgroundColor:"rgb(255,255,255)",
-        borderRadius:5
+        borderRadius:5,
+        height:300
     },
     group:{
         flexDirection:"row",
@@ -217,12 +256,12 @@ const styles=StyleSheet.create({
     textInput:{
         borderWidth:1,
         padding:0,padding:5,
-        width:width*wp-85
+        width:width*wp-100
     },
     loginButton:{
         justifyContent:"flex-start",
         width:200,
-        marginLeft:width*((1-wp)/2)+75,
+        marginLeft:width*((1-wp)/2)+80,
         marginTop:12
     }
 });

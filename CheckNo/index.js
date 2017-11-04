@@ -26,7 +26,7 @@ const tabApp=TabNavigator({
         activeTintColor: '#ff8500', // 文字和图片选中颜色
         inactiveTintColor: '#fff', // 文字和图片未选中颜色
         labelStyle: {
-            fontSize: 15, // 文字大小
+            fontSize: 18, // 文字大小
         },
         style:{
             height:40

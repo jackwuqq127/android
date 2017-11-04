@@ -17,7 +17,11 @@ export default class AddNo extends  Component{
         this.carnoValue="";
         this.cellphoneValue="";
         this.name="";
+        this.companyunit="";
         this.sqlite=new  Sqlite();
+        //this.sqlite.drop();
+        this.sqlite.createTable();
+        console.log("构造函数执行……");
     }
 
     componentWillMount (){
@@ -26,9 +30,11 @@ export default class AddNo extends  Component{
             textCellphoneNoInputColor:"#ccc",
             textCarNoInputColor:"#ccc",
             textNameColor:"#ccc",
+            textCompanyunitColor:"#ccc",
             carno:"",
             cellphone:"",
-            name:""
+            name:"",
+            companyunit:""
         });
     }
 
@@ -48,14 +54,22 @@ export default class AddNo extends  Component{
             flag=false;
         }
 
-        if(this.name.length==0){
+        if(this.cellphoneValue.length==0){
             this.setState({
                 textCellphoneNoInputColor:"red"
             });
             flag=false;
         }
+
+        if(this.companyunit.length==0){
+            this.setState({
+                textCompanyunitColor:"red"
+            });
+            flag=false;
+        }
+
         if(flag){
-            this.submiAddData(this.carnoValue,this.cellphoneValue);
+            this.submiAddData();
         }
     }
 
@@ -63,7 +77,7 @@ export default class AddNo extends  Component{
         if(db==null){ db=this.sqlite.open(); }
         let srcData=[];
         let get= db.transaction((tx)=>{
-            tx.executeSql("select id,name,carno,cellphone from cars where id=(select max(id) from cars)",[],(tx,rs)=>{
+            tx.executeSql("select id,name,carno,cellphone,companyunit from cars where id=(select max(id) from cars)",[],(tx,rs)=>{
                 let len=rs.rows.length;
                 for(let i=0;i<len;i++){
                     let o=rs.rows.item(i);
@@ -78,11 +92,12 @@ export default class AddNo extends  Component{
         });
     }
 
-    submiAddData (carno,phoneno){
-        this.sqlite.update("insert into cars(name,carno,cellphone) values(?,?,?)",[this.name,this.carnoValue,this.cellphoneValue],(msg)=>{
+    submiAddData (){
+        this.sqlite.update("insert into cars(name,carno,cellphone,companyunit) " +
+            "values(?,?,?,?)",[this.name,this.carnoValue,this.cellphoneValue,this.companyunit],(msg)=>{
             this.loadData();
         });
-        this.setState({carno:"",cellphone:"", name:""});
+        this.setState({carno:"",cellphone:"", name:"",companyunit:"" });
     }
     deleteData =(id)=>{
         this.sqlite.update("delete from cars where id=?",[id],this.loadData);
@@ -98,7 +113,7 @@ export default class AddNo extends  Component{
                 <View style={styles.form} >
                     <View style={styles.group} >
                         <View style={{ justifyContent: 'center'}}>
-                            <Text style={{ width:75,textAlign:"right"}} >车牌号：</Text>
+                            <Text style={{ width:95,textAlign:"right",fontSize:16}} >车牌号：</Text>
                         </View>
 
                          <TextInput style={[styles.textInput,{borderColor:this.state.textCarNoInputColor}]}
@@ -117,7 +132,7 @@ export default class AddNo extends  Component{
 
                     <View style={styles.group} >
                         <View style={{ justifyContent: 'center'}}>
-                            <Text style={{ width:75,textAlign:"right"}} >车主姓名：</Text>
+                            <Text style={{ width:95,textAlign:"right",fontSize:16}} >车主姓名：</Text>
                         </View>
 
                         <TextInput style={[styles.textInput,{borderColor:this.state.textNameColor}]} underlineColorAndroid="transparent"
@@ -136,7 +151,7 @@ export default class AddNo extends  Component{
 
                     <View style={styles.group} >
                         <View style={{ justifyContent: 'center'}}>
-                            <Text style={{width:75,textAlign:"right" }} >车主电话：</Text>
+                            <Text style={{width:95,textAlign:"right",fontSize:16 }} >车主电话：</Text>
                         </View>
 
                         <TextInput style={[styles.textInput,{borderColor:this.state.textCellphoneNoInputColor}]}
@@ -153,6 +168,29 @@ export default class AddNo extends  Component{
                            }}
                         />
                     </View>
+
+
+                    <View style={styles.group} >
+                        <View style={{ justifyContent: 'center'}}>
+                            <Text style={{width:95,textAlign:"right",fontSize:16 }} >单位/公司：</Text>
+                        </View>
+
+                        <TextInput style={[styles.textInput,{borderColor:this.state.textCompanyunitColor}]}
+                                   underlineColorAndroid="transparent" placeholder={"单位/公司"} value={this.state.companyunit}
+                                   onChangeText={(text)=>{
+                                       this.companyunit=text;
+                                       this.state.companyunit=text;
+
+                                       if(text.length==0){
+                                           this.setState({ textCompanyunitColor:"red" });
+                                       }else{
+                                           this.setState({textCompanyunitColor:"#ccc" });
+                                       }
+                                   }}
+                        />
+                    </View>
+
+
                 </View>
 
                 <View style={styles.loginButton}>
@@ -183,7 +221,7 @@ export default class AddNo extends  Component{
 
 var {height,width} = Dimensions.get('window');
 var wp=0.85;
-width=width-75;
+width=width-95;
 const styles=StyleSheet.create({
     form:{
         padding:0,

@@ -24,7 +24,7 @@ export default class ShowDataBase extends  Component{
         if(db==null){ db=sqlite.open(); }
         let srcData=[];
         let get= db.transaction((tx)=>{
-            tx.executeSql("select id,name,carno,cellphone from cars",[],(tx,rs)=>{
+            tx.executeSql("select id,name,carno,cellphone,companyunit from cars",[],(tx,rs)=>{
                 let len=rs.rows.length;
                 for(let i=0;i<len;i++){
                     let o=rs.rows.item(i);

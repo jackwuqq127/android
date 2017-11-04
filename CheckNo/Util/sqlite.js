@@ -37,13 +37,30 @@ export default class  SQLite extends Component{
         db = null;
     }
 
+    drop(){
+        if (!db) {this.open(); }
+        db.transaction((tx)=> { //删表
+            tx.executeSql('drop table cars', [], ()=> {
+                this._successCB('executeSql');
+            }, (err)=> {
+                this._errorCB('executeSql', err);
+            });
+        }, (err)=> {
+            this._errorCB('transaction', err);
+        }, ()=> {
+            this._successCB('transaction');
+        });
+    }
+
     createTable(){
-        if (!db) {
-            this.open();
-        }
+        if (!db) {this.open(); }
         //建表
         db.transaction((tx)=> {
-            tx.executeSql('CREATE TABLE IF NOT EXISTS cars(id INTEGER PRIMARY KEY  AUTOINCREMENT,name varchar,carno varchar,cellphone varchar)', [], ()=> {
+            tx.executeSql('CREATE TABLE IF NOT EXISTS cars(' +
+                'id INTEGER PRIMARY KEY  AUTOINCREMENT,' +
+                'name varchar,carno varchar,' +
+                'cellphone varchar,' +
+                'companyunit varchar)', [], ()=> {
                     this._successCB('executeSql');
                 }, (err)=> {
                     this._errorCB('executeSql', err);

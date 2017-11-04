@@ -36,7 +36,7 @@ export default class CheckNo extends Component{
         let srcData=[];
 
         let get= db.transaction((tx)=>{
-            tx.executeSql("select id,name,carno,cellphone from cars where carno like '%"+this.state.searchCarno+"%'",[],(tx,rs)=>{
+            tx.executeSql("select id,name,carno,cellphone,companyunit from cars where carno like '%"+this.state.searchCarno+"%'",[],(tx,rs)=>{
                 let len=rs.rows.length;
                 for(let i=0;i<len;i++){
                     let o=rs.rows.item(i);
